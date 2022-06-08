@@ -31,14 +31,14 @@ $ todo -r -pTODO -dsome_dir
 
 You can add a `config.json` file in the same directory as the todo binary. If no config file is found then default options will be used. These are the config options you can put in you config file:
 
-```json
+```js
 // These are also the default values
 {
     "prefix": "Todo:",
     // Max search depth
     "depth": 5,
     "relativePaths": false,
-    // Ingored file extensions (exe, png etc)
+    // Ignored file extensions (exe, png etc)
     "ignoreFiles": [],
     // Ignored directories (.vscode, .git etc)
     "ignoreDirs": []
