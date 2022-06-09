@@ -6,6 +6,31 @@ import (
 	"os"
 )
 
+var VERSION = "1.1.0"
+
+var HELP_STRING = `Use:
+	todo <flag> <option>
+
+Examples:
+	todo -pBUG: -r
+	todo --version
+
+Flags:
+	-d		Specify directory to look into
+	-p 		Choose prefix (defualts to one in config.json)
+	-r		Use relative paths (can also be set in config.json)
+
+Options:
+	--help		What you are reading
+	--version	Print program version
+
+https://github.com/jesperkha/todo`
+
+func printexit(f string, args ...any) {
+	fmt.Println(fmt.Sprintf(f, args...))
+	os.Exit(0)
+}
+
 type config struct {
 	Prefix        string   `json:"prefix"`
 	Depth         int      `json:"depth"`
@@ -18,44 +43,45 @@ func main() {
 	var mainConfig config
 
 	if configFile, err := os.ReadFile("config.json"); err == nil {
-		err = json.Unmarshal(configFile, &mainConfig)
-		if err != nil {
-			fmt.Println("invalid input in config.json")
-			return
+		if json.Unmarshal(configFile, &mainConfig) != nil {
+			printexit("invalid input in config.json")
 		}
 	} else {
 		// Defualt options
 		mainConfig = config{Prefix: "Todo:", Depth: 5}
 	}
 
-	var (
-		relative = mainConfig.RelativePaths
-		prefix   = mainConfig.Prefix
-		dir      = "."
-	)
+	// Variable config set by flags
+	relative := mainConfig.RelativePaths
+	prefix := mainConfig.Prefix
+	directory := "."
 
-	args := os.Args[1:]
-	for _, arg := range args {
+	for _, arg := range os.Args[1:] {
+		option := arg
+		switch option {
+		case "--help":
+			printexit(HELP_STRING)
+		case "--version":
+			printexit(VERSION)
+		}
+
 		argPrefix := arg[:2]
 		value := arg[2:]
-
 		switch argPrefix {
 		case "-r":
 			relative = true
 		case "-d":
-			dir = value
+			directory = value
 		case "-p":
 			prefix = value
 		default:
-			fmt.Printf("unknown option '%s'\n", argPrefix)
-			return
+			printexit("unknown option '%s'", argPrefix)
 		}
 	}
 
 	w := NewTodoWriter(prefix, mainConfig.Depth, relative, mainConfig.IgnoreFiles, mainConfig.IgnoreDirs)
-	if err := w.Read(dir); err != nil {
-		fmt.Println(err)
-		return
+	if err := w.Read(directory); err != nil {
+		printexit("%s", err)
 	}
 
 	w.PrintList()
