@@ -1,4 +1,4 @@
-package main
+package writer
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 type TodoWriter struct {
 	writer     *tabwriter.Writer
-	list       []todo
+	list       []Todo
 	target     string
 	maxDepth   int
 	relative   bool
@@ -19,10 +19,11 @@ type TodoWriter struct {
 	dirIgnore  map[string]struct{}
 }
 
-type todo struct {
-	file    string
-	line    int
-	message string
+type Todo struct {
+	File       string
+	Line       int
+	Message    string
+	ByteOffset int
 }
 
 func NewTodoWriter(target string, depth int, relativePaths bool, ignoredFiles []string, ignoredDirs []string) *TodoWriter {
@@ -38,7 +39,7 @@ func NewTodoWriter(target string, depth int, relativePaths bool, ignoredFiles []
 
 	return &TodoWriter{
 		writer:     tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0),
-		list:       []todo{},
+		list:       []Todo{},
 		target:     target,
 		maxDepth:   depth,
 		relative:   relativePaths,
@@ -47,6 +48,8 @@ func NewTodoWriter(target string, depth int, relativePaths bool, ignoredFiles []
 	}
 }
 
+// Reads the given directory for todos and adds them to the writers list.
+// The writer list is not cleared before reading.
 func (td *TodoWriter) Read(dirname string) error {
 	dir, err := os.ReadDir(dirname)
 	if err != nil {
@@ -107,7 +110,7 @@ func (td *TodoWriter) Read(dirname string) error {
 					// Remove leading ./
 					filepath = filepath[2:]
 				}
-				td.list = append(td.list, todo{filepath, line, message})
+				td.list = append(td.list, Todo{filepath, line, message, idx})
 			}
 		}
 	}
@@ -115,6 +118,7 @@ func (td *TodoWriter) Read(dirname string) error {
 	return nil
 }
 
+// Prints the formatted list
 func (td *TodoWriter) PrintList() {
 	if len(td.list) == 0 {
 		fmt.Println("no results...")
@@ -128,15 +132,15 @@ func (td *TodoWriter) PrintList() {
 	longestPath := 0
 	longestMsg := 0
 	for idx, item := range td.list {
-		filepath := fmt.Sprintf("%s:%d", item.file, item.line)
-		formatted := fmt.Sprintf("│ \t %d. \t %s \t %s \t │\n", idx+1, filepath, item.message)
+		filepath := fmt.Sprintf("%s:%d", item.File, item.Line)
+		formatted := fmt.Sprintf("│ \t %d. \t %s \t %s \t │\n", idx+1, filepath, item.Message)
 		td.writer.Write([]byte(formatted))
 
 		if len(filepath) > longestPath {
 			longestPath = len(filepath)
 		}
-		if len(item.message) > longestMsg {
-			longestMsg = len(item.message)
+		if len(item.Message) > longestMsg {
+			longestMsg = len(item.Message)
 		}
 	}
 	fmt.Fprint(td.writer, empty)
@@ -160,4 +164,9 @@ func (td *TodoWriter) PrintList() {
 	fmt.Println(header + "┐")
 	td.writer.Flush()
 	fmt.Println(footer + "┘")
+}
+
+// Returns the writers current item list
+func (td *TodoWriter) GetList() []Todo {
+	return td.list
 }
