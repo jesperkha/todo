@@ -1,22 +1,18 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/jesperkha/todo/util"
-	"github.com/jesperkha/todo/writer"
 )
 
 var (
 	itemIndexOutOfRange = errors.New("item index is out of range")
 )
-
-func newWriter(config configFile) *writer.TodoWriter {
-	return writer.NewTodoWriter(config.Prefix, config.Depth, config.RelativePaths, config.IgnoreFiles, config.IgnoreDirs)
-}
 
 // Removes specified list item from file
 func cmdRemove(config configFile, args []string) error {
@@ -37,7 +33,14 @@ func cmdRemove(config configFile, args []string) error {
 		util.ErrAndExit(err)
 	}
 
-	// Todo: remove line
+	// Remove line and stitch file back together
+	lines := bytes.Split(file, []byte{'\n'})
+	stitched := append(lines[:todo.Line-1], lines[todo.Line:]...)
+
+	joined := bytes.Join(stitched, []byte{'\n'})
+	if err := os.WriteFile(todo.File, joined, os.ModeAppend); err != nil {
+		return err
+	}
 
 	return nil
 }

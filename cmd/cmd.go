@@ -18,6 +18,10 @@ type configFile struct {
 	RelativePaths bool     `json:"relativePaths"`
 }
 
+func newWriter(config configFile) *writer.TodoWriter {
+	return writer.NewTodoWriter(config.Prefix, config.Depth, config.RelativePaths, config.IgnoreFiles, config.IgnoreDirs)
+}
+
 func Run() {
 	// Parse subcommand/option
 	subcommand := ""
@@ -47,20 +51,22 @@ func Run() {
 	}
 
 	// Run correct subcommand
+	var err error
 	switch subcommand {
 	case "":
 		cmdMain(config, os.Args[1:])
 	case "rm":
-		cmdRemove(config, os.Args[2:])
+		err = cmdRemove(config, os.Args[2:])
 	default:
 		util.ErrAndExit(fmt.Errorf("unknown command %s", subcommand))
+	}
+
+	if err != nil {
+		util.ErrAndExit(err)
 	}
 }
 
 func cmdMain(config configFile, args []string) {
-	// Variable config set by flags
-	relative := config.RelativePaths
-	prefix := config.Prefix
 	directory := "."
 
 	for _, arg := range args {
@@ -68,18 +74,18 @@ func cmdMain(config configFile, args []string) {
 		value := arg[2:]
 		switch argPrefix {
 		case "-r":
-			relative = true
+			config.RelativePaths = true
 		case "-d":
 			directory = value
 		case "-p":
-			prefix = value
+			config.Prefix = value
 		default:
 			util.ErrAndExit(fmt.Errorf("unknown option '%s'", argPrefix))
 		}
 	}
 
 	// Read and print
-	w := writer.NewTodoWriter(prefix, config.Depth, relative, config.IgnoreFiles, config.IgnoreDirs)
+	w := newWriter(config)
 	if err := w.Read(directory); err != nil {
 		util.ErrAndExit(err)
 	}
