@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	itemIndexOutOfRange = errors.New("item index is out of range")
+	errIndexOutOfRange = errors.New("item index is out of range")
 )
 
 // Removes specified list item from file
@@ -24,7 +24,7 @@ func cmdRemove(config configFile, args []string) error {
 	w := newWriter(config)
 	w.Read(".")
 	if int(item)-1 >= len(w.GetList()) || int(item) == 0 {
-		return itemIndexOutOfRange
+		return errIndexOutOfRange
 	}
 
 	todo := w.GetList()[item-1]

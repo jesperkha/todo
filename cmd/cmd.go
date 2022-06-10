@@ -2,12 +2,17 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/jesperkha/todo/util"
 	"github.com/jesperkha/todo/writer"
+)
+
+var (
+	errInvalidJson = errors.New("invalid input in config.json")
 )
 
 type configFile struct {
@@ -43,7 +48,7 @@ func Run() {
 	var config configFile
 	if file, err := os.ReadFile("config.json"); err == nil {
 		if json.Unmarshal(file, &config) != nil {
-			util.ErrAndExit(fmt.Errorf("invalid input in config.json"))
+			util.ErrAndExit(errInvalidJson)
 		}
 	} else {
 		// Defualt options
