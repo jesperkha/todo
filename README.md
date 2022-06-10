@@ -37,7 +37,7 @@ $ todo -r -pTODO -dsome_dir
 
 ## Commands
 
-**`rm`**
+### `rm`
 
 Remove a todo from a file (removes the line the todo is located at). The list index is the number on the left of the list item when printing (starts at 1).
 
