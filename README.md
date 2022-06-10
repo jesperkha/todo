@@ -2,6 +2,8 @@
 
 CLI application for reading markers in codebases (typically todos).
 
+<br>
+
 ## Use:
 
 By default, it will run with configuration set in `config.json`
@@ -22,10 +24,26 @@ Flags:
 - `-d`: specify directory
 - `-p`: specify prefix (overrides config)
 
+Options:
+- `--help`: display help info
+- `--version`: print version
+
 Example:
 ```console
 $ todo -r -pTODO -dsome_dir
 ```
+
+<br>
+
+## Commands
+
+**`rm`**
+
+Remove a todo from a file (removes the line the todo is located at). The list index is the number on the left of the list item when printing (starts at 1).
+
+`todo rm <list_index>`
+
+<br>
 
 ## Config
 
