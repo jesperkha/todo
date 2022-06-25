@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"path"
 
 	"github.com/jesperkha/todo/util"
 	"github.com/jesperkha/todo/writer"
@@ -45,18 +46,23 @@ func Run() {
 	}
 
 	// Load and parse json config file
+	e, err := os.Executable()
+	if err != nil {
+		fmt.Println(err)
+	}
+	path := fmt.Sprintf("%s/config.json", path.Dir(e))
 	var config configFile
-	if file, err := os.ReadFile("config.json"); err == nil {
+	if file, err := os.ReadFile(path); err == nil {
 		if json.Unmarshal(file, &config) != nil {
 			util.ErrAndExit(errInvalidJson)
 		}
 	} else {
+		fmt.Println("NO JSON FOUND") // Debug
 		// Defualt options
 		config = configFile{Prefix: "Todo:", Depth: 5}
 	}
 
 	// Run correct subcommand
-	var err error
 	switch subcommand {
 	case "":
 		cmdMain(config, os.Args[1:])
