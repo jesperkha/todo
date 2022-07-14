@@ -13,6 +13,7 @@ Flags:
 	-d		Specify directory to look into
 	-p 		Choose prefix (defualts to one in config.json)
 	-r		Use relative paths (can also be set in config.json)
+	-t		Print todos as raw text without formatting
 
 Options:
 	--help		What you are reading
