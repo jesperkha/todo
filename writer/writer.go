@@ -118,6 +118,13 @@ func (td *TodoWriter) Read(dirname string) error {
 	return nil
 }
 
+// Prints raw todos without any formatting
+func (td *TodoWriter) PrintRaw() {
+	for _, item := range td.list {
+		fmt.Println(item.Message)
+	}
+}
+
 // Prints the formatted list
 func (td *TodoWriter) PrintList() {
 	if len(td.list) == 0 {

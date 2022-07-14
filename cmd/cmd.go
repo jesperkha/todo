@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"path"
+	"strings"
 
 	"github.com/jesperkha/todo/util"
 	"github.com/jesperkha/todo/writer"
@@ -79,6 +79,7 @@ func Run() {
 
 func cmdMain(config configFile, args []string) {
 	directory := "."
+	raw := false
 
 	for _, arg := range args {
 		argPrefix := arg[:2]
@@ -90,6 +91,8 @@ func cmdMain(config configFile, args []string) {
 			directory = value
 		case "-p":
 			config.Prefix = value
+		case "-t":
+			raw = true
 		default:
 			util.ErrAndExit(fmt.Errorf("unknown option '%s'", argPrefix))
 		}
@@ -101,5 +104,9 @@ func cmdMain(config configFile, args []string) {
 		util.ErrAndExit(err)
 	}
 
-	w.PrintList()
+	if !raw {
+		w.PrintList()
+	} else {
+		w.PrintRaw()
+	}
 }

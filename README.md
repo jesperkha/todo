@@ -19,6 +19,7 @@ Flags:
 - `-r`: use relative paths (overrides config)
 - `-d`: specify directory
 - `-p`: specify prefix (overrides config)
+- `-t`: print todos as raw text without formatting
 
 Options:
 - `--help`: display help info
